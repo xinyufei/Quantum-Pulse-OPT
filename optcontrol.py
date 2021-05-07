@@ -23,9 +23,9 @@ generate_Jij(n)
 # generate_Jij_LR(n, 1, 2)
 # Generate Hamiltonian
 C_mat = get_ham(n, True)
-np.savetxt('output/C_mat_scale' + str(n) + '.csv', C_mat)
+np.savetxt('output/C_mat' + str(n) + '.csv', C_mat)
 B_mat = get_ham(n, False)
-np.savetxt('output/B_mat_scale' + str(n) + '.csv', B_mat)
+np.savetxt('output/B_mate' + str(n) + '.csv', B_mat)
 # The (single) control Hamiltonian
 H_c = [Qobj(B_mat - C_mat)]
 # Drift Hamiltonian
@@ -33,13 +33,12 @@ H_d = Qobj(C_mat)
 # start point for the gate evolution
 # U_0 = identity(n * n)
 Ground_B = Qobj(B_mat).groundstate()[1]
-# X_0 = Qobj(Ground_B.full() / abs(sum(Ground_B))[0][0])
-# X_0 = Ground_B
-X_0 = Qobj(np.zeros((n*n, 1)))
+X_0 = Ground_B
+# X_0 = Qobj(np.zeros((n*n, 1)))
 # Target for the gate evolution
 # U_targ = Qobj(C_mat)
 Ground_C = Qobj(C_mat).groundstate()[1]
-X_targ = Qobj(Ground_C.full() / abs(sum(Ground_C))[0][0])
+X_targ = Ground_C
 
 print(X_0)
 print(X_targ)
