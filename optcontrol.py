@@ -15,6 +15,7 @@ log_level = logging.INFO
 # QuTiP control modules
 
 example_name = 'Optcontrol'
+# set the dimension
 n = 4
 
 # Generate J_ij
@@ -46,7 +47,7 @@ print(X_targ)
 # Number of time slots
 n_ts = 40
 # Time allowed for the evolution
-evo_time = 2
+evo_time = 1
 # Number of controlers
 n_ctrls = len(H_c)
 
@@ -62,8 +63,11 @@ min_grad = 1e-50
 
 # Set initial state
 # pulse type alternatives: RND|ZERO|LIN|SINE|SQUARE|SAW|TRIANGLE|
-p_type = 'RND'
-offset = 0.5
+p_type = 'ZERO'
+offset = 0
+# lower bound and upper bound of initial value
+init_lb = 0
+init_ub = 1
 
 # Set output files
 f_ext = "{}_n_ts{}_ptype{}.txt".format(example_name, n_ts, p_type)
@@ -73,7 +77,7 @@ optim = cpo.create_pulse_optimizer(H_d, H_c, X_0, X_targ, n_ts, evo_time,
                                    amp_lbound=0, amp_ubound=1,
                                    fid_err_targ=fid_err_targ, min_grad=min_grad,
                                    max_iter=max_iter, max_wall_time=max_wall_time, dyn_type='GEN_MAT',
-                                   fid_type='TRACEDIFF', init_pulse_type=p_type, init_pulse_params={"offset": offset},
+                                   init_pulse_type=p_type, init_pulse_params={"offset": offset},
                                    log_level=log_level, gen_stats=True)
 
 # Initialization
@@ -84,6 +88,8 @@ p_gen = pulsegen.create_pulse_gen(p_type, dyn)
 # Generate different initial pulses for each of the controls
 init_amps = np.zeros([n_ts, n_ctrls])
 for j in range(n_ctrls):
+    p_gen.lbound = init_lb
+    p_gen.ubound = init_ub
     p_gen.offset = offset
     init_amps[:, j] = p_gen.gen_pulse()
 dyn.initialize_controls(init_amps)
@@ -120,4 +126,5 @@ ax2.step(result.time,
          np.hstack((result.final_amps[:, 0], result.final_amps[-1, 0])),
          where='post')
 plt.tight_layout()
-plt.savefig("output/" + "{}_n_ts{}_ptype{}".format(example_name, n_ts, p_type) + ".png")
+plt.savefig("output/" + "{}_evotime{}_n_ts{}_ptype{}_offset{}".format(
+    example_name, evo_time, n_ts, p_type, offset) + ".png")
