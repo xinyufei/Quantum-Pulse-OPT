@@ -1,4 +1,3 @@
-import numpy as np
 import matplotlib.pyplot as plt
 import datetime
 
@@ -13,13 +12,12 @@ logger = logging.get_logger()
 # Set this to None or logging.WARN for 'quiet' execution
 log_level = logging.INFO
 # QuTiP control modules
-
-example_name = 'Optcontrol'
+example_name = 'Ising'
 # set the dimension
 n = 4
 
 # Generate J_ij
-# generate_Jij_MC(n, 5)
+# generate_Jij_MC(n, 3)
 generate_Jij(n)
 # generate_Jij_LR(n, 1, 2)
 # Generate Hamiltonian
@@ -45,9 +43,9 @@ print(X_0)
 print(X_targ)
 
 # Number of time slots
-n_ts = 40
+n_ts = 500
 # Time allowed for the evolution
-evo_time = 1
+evo_time = 10
 # Number of controlers
 n_ctrls = len(H_c)
 
@@ -64,11 +62,11 @@ min_grad = 1e-50
 # Set initial state
 # pulse type alternatives: RND|ZERO|LIN|SINE|SQUARE|SAW|TRIANGLE|
 p_type = 'ZERO'
-offset = 0
+offset = 0.5
 # lower bound and upper bound of initial value
 init_lb = 0
 init_ub = 1
-
+obj_type = "UNIT"
 # Set output files
 f_ext = "{}_n_ts{}_ptype{}.txt".format(example_name, n_ts, p_type)
 
@@ -77,6 +75,7 @@ optim = cpo.create_pulse_optimizer(H_d, H_c, X_0, X_targ, n_ts, evo_time,
                                    amp_lbound=0, amp_ubound=1,
                                    fid_err_targ=fid_err_targ, min_grad=min_grad,
                                    max_iter=max_iter, max_wall_time=max_wall_time, dyn_type='GEN_MAT',
+                                   fid_type=obj_type, phase_option="PSU",
                                    init_pulse_type=p_type, init_pulse_params={"offset": offset},
                                    log_level=log_level, gen_stats=True)
 
@@ -99,14 +98,16 @@ result = optim.run_optimization()
 
 # Report the results
 result.stats.report()
-print("Final evolution\n{}\n".format(result.evo_full_final))
-print("********* Summary *****************")
-print("Final fidelity error {}".format(result.fid_err))
-print("Final gradient normal {}".format(result.grad_norm_final))
-print("Terminated due to {}".format(result.termination_reason))
-print("Number of iterations {}".format(result.num_iter))
+report = open("output/" + "{}_evotime{}_n_ts{}_ptype{}_offset{}_obj{}".format(
+    example_name, evo_time, n_ts, p_type, offset, obj_type) + ".log", "w+")
+print("Final evolution\n{}\n".format(result.evo_full_final), file=report)
+print("********* Summary *****************", file=report)
+print("Final fidelity error {}".format(result.fid_err), file=report)
+print("Final gradient normal {}".format(result.grad_norm_final), file=report)
+print("Terminated due to {}".format(result.termination_reason), file=report)
+print("Number of iterations {}".format(result.num_iter), file=report)
 print("Completed in {} HH:MM:SS.US".format(
-    datetime.timedelta(seconds=result.wall_time)))
+    datetime.timedelta(seconds=result.wall_time)), file=report)
 
 # Plot the results
 fig1 = plt.figure()
@@ -126,5 +127,6 @@ ax2.step(result.time,
          np.hstack((result.final_amps[:, 0], result.final_amps[-1, 0])),
          where='post')
 plt.tight_layout()
-plt.savefig("output/" + "{}_evotime{}_n_ts{}_ptype{}_offset{}".format(
-    example_name, evo_time, n_ts, p_type, offset) + ".png")
+plt.savefig("output/" + "{}_evotime{}_n_ts{}_ptype{}_offset{}_obj{}".format(
+    example_name, evo_time, n_ts, p_type, offset, obj_type) + ".png")
+

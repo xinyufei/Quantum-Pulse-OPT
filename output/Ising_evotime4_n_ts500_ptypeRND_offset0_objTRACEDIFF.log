@@ -1,0 +1,26 @@
+Final evolution
+Quantum object: dims = [[16], [1]], shape = (16, 1), type = ket
+Qobj data =
+[[ 4.52756694e-06]
+ [-1.49743509e-06]
+ [-1.50781729e-06]
+ [ 5.79705001e-06]
+ [-2.67267674e-05]
+ [ 2.03929852e-06]
+ [ 5.85201991e-06]
+ [-3.14366916e-06]
+ [-3.14366893e-06]
+ [ 5.85201994e-06]
+ [ 2.03929862e-06]
+ [-2.67267680e-05]
+ [ 5.79704993e-06]
+ [-1.50781742e-06]
+ [-1.49743526e-06]
+ [ 4.52756752e-06]]
+
+********* Summary *****************
+Final fidelity error 0.03125009364101962
+Final gradient normal 0.001236275493900994
+Terminated due to Max wall time exceeded
+Number of iterations 54
+Completed in 0:02:02.727243 HH:MM:SS.US

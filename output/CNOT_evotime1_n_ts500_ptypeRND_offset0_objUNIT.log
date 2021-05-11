@@ -1,0 +1,18 @@
+Final evolution
+Quantum object: dims = [[4], [4]], shape = (4, 4), type = oper, isherm = False
+Qobj data =
+[[ 0.22849949-0.73173085j -0.43623353+0.0658986j  -0.38540895-0.11192324j
+   0.2014707 +0.1267214j ]
+ [-0.30416052-0.35605446j -0.31138345-0.42021055j  0.58866311-0.1372292j
+  -0.26998184-0.26254283j]
+ [-0.12223331-0.34590639j  0.58138702-0.13966164j -0.29947204-0.17621242j
+  -0.59611021+0.17835314j]
+ [-0.18921443+0.15058298j  0.06063267-0.41307211j -0.48167682-0.34760629j
+   0.27841849-0.58039489j]]
+
+********* Summary *****************
+Final fidelity error 0.5603472840784751
+Final gradient normal 0.012244462335501208
+Terminated due to Iteration or fidelity function call limit reached
+Number of iterations 500
+Completed in 0:02:00.469506 HH:MM:SS.US
