@@ -6,3 +6,15 @@ code_Brady_opt/
 result.xlsx
 
 ~$result.xlsx
+
+optcontrol_Ising_CRAB.py
+
+ctrl_amps_final_Ising_n_ts40_ptypeZERO.txt
+
+ctrl_amps_initial_Ising_n_ts40_ptypeZERO.txt
+
+output-CRAB/
+
+test.log
+
+test2.log

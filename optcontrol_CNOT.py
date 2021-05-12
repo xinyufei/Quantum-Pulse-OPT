@@ -1,5 +1,6 @@
 import datetime
 import numpy as np
+from scipy.linalg import expm
 import matplotlib.pyplot as plt
 
 from qutip import Qobj, identity, sigmax, sigmaz, sigmay, tensor
@@ -7,6 +8,29 @@ from qutip.qip.operations.gates import cnot
 import qutip.logging_utils as logging
 import qutip.control.pulseoptim as cpo
 import qutip.control.pulsegen as pulsegen
+
+
+def time_evolution(H_d, H_c, n_ts, evo_time, u_list, X_0):
+    n_ctrls = len(H_c)
+    delta_t = evo_time / n_ts
+    X = [X_0]
+    for t in range(n_ts):
+        H_t = H_d.copy()
+        for j in range(n_ctrls):
+            H_t += u_list[t, j] * H_c[j].copy()
+        X_t = expm(-1j*H_t*delta_t).dot(X[t])
+        X.append(X_t)
+    # f = open("test2.log", "w+")
+    # print(X, file=f)
+    # f.close()
+    return X[-1]
+
+
+def compute_obj(U_targ, U_result):
+    fid = np.abs(np.trace((np.linalg.inv(U_targ.full()).dot(U_result)))) / U_targ.full().shape[0]
+    obj = 1 - fid
+    return obj
+
 
 logger = logging.get_logger()
 # Set this to None or logging.WARN for 'quiet' execution
@@ -25,7 +49,7 @@ U_0 = identity(4)
 U_targ = cnot()
 
 # Time allowed for the evolution
-evo_time = 1
+evo_time = 3
 # Number of time slots
 n_ts = 20 * evo_time
 # Number of controllers
@@ -43,12 +67,12 @@ min_grad = 1e-10
 
 # Set initial state
 # pulse type alternatives: RND|ZERO|LIN|SINE|SQUARE|SAW|TRIANGLE|
-p_type = 'RND'
-offset = 0
+p_type = 'ZERO'
+offset = 0.5
 # lower bound and upper bound of initial value
 init_lb = 0
 init_ub = 1
-obj_type = "TRACEDIFF"
+obj_type = "UNIT"
 # Set output files
 f_ext = "{}_n_ts{}_ptype{}.txt".format(example_name, n_ts, p_type)
 
@@ -78,6 +102,9 @@ dyn.initialize_controls(init_amps)
 # Run the optimization
 result = optim.run_optimization()
 
+# f = open("test.log","w+")
+# print(optim.dynamics.fwd_evo, file=f)
+# f.close()
 # Report the results
 result.stats.report()
 report = open("output/" + "{}_evotime{}_n_ts{}_ptype{}_offset{}_obj{}".format(
@@ -114,3 +141,7 @@ plt.tight_layout()
 plt.savefig("output/" + "{}_evotime{}_n_ts{}_ptype{}_offset{}_obj{}".format(
     example_name, evo_time, n_ts, p_type, offset, obj_type) + ".png")
 
+# print(np.linalg.inv(U_targ.full()).dot(result.evo_full_final))
+# print(np.trace((np.linalg.inv(U_targ.full()).dot(result.evo_full_final))))
+print(time_evolution(H_d.full(), [h_c.full() for h_c in H_c], n_ts, evo_time, result.final_amps, U_0.full()))
+print(compute_obj(U_targ, result.evo_full_final))
