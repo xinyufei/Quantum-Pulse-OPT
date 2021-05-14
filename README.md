@@ -43,7 +43,8 @@ if_warm_start = True
 The users can choose the warm start control you want from a .csv file by setting the variable initial_control as the file name. Here is an example. 
 
 ```python
-initial_control = "../control/" + "{}_evotime{}_n_ts{}_ptype{}_offset{}_obj{}".format(example_name, 1, 16, "ZERO", 0.5, obj_type) + ".csv"
+initial_control = "../control/" + "{}_evotime{}_n_ts{}_ptype{}_offset{}_obj{}".format(
+        example_name, 1, 16, "ZERO", 0.5, obj_type) + ".csv"
 ```
 
 The users can change the evolution time and number of time steps by setting the following variables. 
@@ -84,7 +85,8 @@ if_warm_start = True
 The users can choose the warm start control you want from a .csv file by setting the variable initial_control as the file name. Here is an example. 
 
 ```python
-initial_control = "../control/" + "{}_evotime{}_n_ts{}_ptype{}_offset{}_obj{}".format(example_name, 10, 200, "ZERO", 0.5, obj_type) + ".csv"
+initial_control = "../control/" + "{}_evotime{}_n_ts{}_ptype{}_offset{}_obj{}".format(
+        example_name, 10, 200, "ZERO", 0.5, obj_type) + ".csv"
 ```
 
 The users can add a constraint indicating that the summation of all the control variables should be 1 at each time step by setting 
@@ -190,7 +192,8 @@ output_control = "../control/" + "{}_evotime{}_n_ts{}_ptype{}_offset{}_obj{}".fo
 # choose to add the summation as 1 constraint or not
 sum_cons_1 = True
 # run the optimization
-optcontrol(example_name, H_d, H_c, X_0, X_targ, n_ts, evo_time, p_type, initial_control, output_num, output_fig, output_control, sum_cons_1, fid_err_targ, max_iter, max_wall_time, min_grad, offset)
+optcontrol(example_name, H_d, H_c, X_0, X_targ, n_ts, evo_time, p_type, initial_control, output_num, output_fig, output_control,
+           sum_cons_1, fid_err_targ, max_iter, max_wall_time, min_grad, offset)
 ```
 
 ##### Step 7: do the rounding and compute the error (optional)
