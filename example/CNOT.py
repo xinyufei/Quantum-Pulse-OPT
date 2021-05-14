@@ -8,7 +8,7 @@ from evolution import time_evolution, compute_obj
 
 
 if_rounding = True
-if_warm_start = True
+if_warm_start = False
 # if_rounding = True
 
 sum_cons_1 = True
