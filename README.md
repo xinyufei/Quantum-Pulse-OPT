@@ -103,7 +103,19 @@ n_ts = 400
 
 ## Build New Example
 
-Here are the following steps of solving the quantum optimal control by QuTip. 
+Here are the following steps of solving the quantum optimal control by our code based on the QuTip. 
+
+Before starting, please import the needed functions. 
+
+```python
+import os
+from qutip import Qobj, identity, sigmax, sigmaz, sigmay, tensor
+from qutip.qip.operations.gates import cnot
+
+from optcontrol import optcontrol
+from rounding import rounding
+from evolution import time_evolution, compute_obj
+```
 
 ##### Step 1: set Hamiltonian matrices
 
