@@ -18,7 +18,8 @@ There are two examples, the Ising model with one single controller and the CNOT 
 This model includes only one Hamiltonian controller. The users can run this example by the following command line. 
 
 ```
-python example/Ising.py
+cd example
+python Ising.py
 ```
 
 To do the rounding, please set 
@@ -60,7 +61,8 @@ n_ts = 16
 This model include two Hamiltonian controllers to estimate the CNOT gate. The users can run this example by the following command line. 
 
 ```
-python example/CNOT.py
+cd example
+python Ising.py
 ```
 
 To do the rounding, please set 

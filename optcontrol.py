@@ -106,9 +106,9 @@ def optcontrol(example_name, H_d, H_c, X_0, X_targ, n_ts, evo_time, initial_type
         print("Completed in {} HH:MM:SS.US".format(
             datetime.timedelta(seconds=result.wall_time)), file=report)
         report.close()
-    f = open(output_num, "r")
-    dataset = f.readlines()
-    print(dataset)
+    # f = open(output_num, "r")
+    # dataset = f.readlines()
+    # print(dataset)
     # Plot the results
     fig1 = plt.figure()
     ax1 = fig1.add_subplot(2, 1, 1)

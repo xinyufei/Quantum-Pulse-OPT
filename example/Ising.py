@@ -2,6 +2,8 @@ import os
 from qutip import Qobj, identity, sigmax, sigmaz
 from code_Brady_opt.generate_matrix import *
 
+import sys
+sys.path.append("..")
 from optcontrol import optcontrol
 from rounding import rounding
 from evolution import time_evolution, compute_obj
@@ -55,6 +57,8 @@ p_type = "ZERO"
 offset = 0.5
 obj_type = "UNIT"
 initial_control = None
+
+os.chdir(sys.path[0])
 
 if if_warm_start:
     # warm start

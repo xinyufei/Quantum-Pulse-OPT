@@ -2,6 +2,8 @@ import os
 from qutip import Qobj, identity, sigmax, sigmaz, sigmay, tensor
 from qutip.qip.operations.gates import cnot
 
+import sys
+sys.path.append("..")
 from optcontrol import optcontrol
 from rounding import rounding
 from evolution import time_evolution, compute_obj
@@ -33,7 +35,7 @@ X_targ = cnot()
 # Time allowed for the evolution
 evo_time = 20
 # Number of time slots
-n_ts = 20 * evo_time
+n_ts = 120 * evo_time
 
 # Fidelity error target
 fid_err_targ = 1e-10
@@ -49,6 +51,8 @@ p_type = "ZERO"
 offset = 0.5
 obj_type = "UNIT"
 initial_control = None  # no warm start
+
+os.chdir(sys.path[0])
 
 if if_warm_start:
     # warm start
@@ -73,8 +77,11 @@ optcontrol(example_name, H_d, H_c, X_0, X_targ, n_ts, evo_time, p_type, initial_
            sum_cons_1, fid_err_targ, max_iter, max_wall_time, min_grad, offset)
 
 if if_rounding:
-    rounding_type = "BnB"
+    rounding_type = "SUR"
     min_up_time = 1
+
+    if rounding_type == "SUR":
+        min_up_time = "SUR"
 
     bin_amps = rounding(output_control, rounding_type, min_up_time)
 
@@ -85,4 +92,5 @@ if if_rounding:
     print(rounding_result, file=f)
     print("Final objective value: ", file=f)
     print(compute_obj(X_targ, rounding_result), file=f)
+    f.close()
 
