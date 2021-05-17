@@ -33,9 +33,9 @@ X_0 = identity(4)
 X_targ = cnot()
 
 # Time allowed for the evolution
-evo_time = 20
+evo_time = 1
 # Number of time slots
-n_ts = 120 * evo_time
+n_ts = 100 * evo_time
 
 # Fidelity error target
 fid_err_targ = 1e-10
@@ -47,8 +47,8 @@ max_wall_time = 120
 # as this tends to 0 -> local minima has been found
 min_grad = 1e-50
 
-p_type = "ZERO"
-offset = 0.5
+p_type = "RND"
+offset = 0
 obj_type = "UNIT"
 initial_control = None  # no warm start
 

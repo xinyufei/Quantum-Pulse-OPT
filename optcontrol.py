@@ -72,7 +72,7 @@ def optcontrol(example_name, H_d, H_c, X_0, X_targ, n_ts, evo_time, initial_type
     init_amps = np.zeros([n_ts, n_ctrls])
     for j in range(n_ctrls):
         if p_type in ["RND", "ZERO"]:
-            p_gen = pulsegen.create_pulse_gen("ZERO", dyn)
+            p_gen = pulsegen.create_pulse_gen(p_type, dyn)
             p_gen.lbound = init_lb
             p_gen.ubound = init_ub
             p_gen.offset = offset
