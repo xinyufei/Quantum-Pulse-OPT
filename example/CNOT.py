@@ -45,7 +45,7 @@ max_iter = 500
 max_wall_time = 120
 # Minimum gradient (sum of gradients squared)
 # as this tends to 0 -> local minimum has been found
-min_grad = 1e-50
+min_grad = 1e-8
 
 # initialized type
 p_type = "RND"
