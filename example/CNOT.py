@@ -23,7 +23,7 @@ example_name = 'CNOT'
 if sum_cons_1:
     example_name = 'CNOTSUM1'
 
-# The control Hamiltonians
+# The control Hamiltonians (Qobj classes)
 H_c = [tensor(sigmax(), identity(2)), tensor(sigmay(), identity(2))]
 # Drift Hamiltonian
 H_d = tensor(sigmax(), sigmax()) + tensor(sigmay(), sigmay()) + tensor(sigmaz(), sigmaz())
@@ -39,17 +39,20 @@ n_ts = 20 * evo_time
 
 # Fidelity error target
 fid_err_targ = 1e-10
-# Maximum iterations for the optisation algorithm
+# Maximum iterations for the optimise algorithm
 max_iter = 500
 # Maximum (elapsed) time allowed in seconds
 max_wall_time = 120
 # Minimum gradient (sum of gradients squared)
-# as this tends to 0 -> local minima has been found
+# as this tends to 0 -> local minimum has been found
 min_grad = 1e-50
 
+# initialized type
 p_type = "RND"
 offset = 0
+# objective value type
 obj_type = "UNIT"
+# file of the initial control for the warm start
 initial_control = None  # no warm start
 
 os.chdir(sys.path[0])
@@ -73,8 +76,9 @@ output_fig = "../output/" + "{}_evotime{}_n_ts{}_ptype{}_offset{}_obj{}".format(
 output_control = "../control/" + "{}_evotime{}_n_ts{}_ptype{}_offset{}_obj{}".format(
     example_name, evo_time, n_ts, p_type, offset, obj_type) + ".csv"
 
-optcontrol(example_name, H_d, H_c, X_0, X_targ, n_ts, evo_time, p_type, initial_control, output_num, output_fig, output_control,
-           sum_cons_1, fid_err_targ, max_iter, max_wall_time, min_grad, offset)
+# solve the optimization model
+optcontrol(example_name, H_d, H_c, X_0, X_targ, n_ts, evo_time, p_type, initial_control, output_num, output_fig,
+           output_control, sum_cons_1, fid_err_targ, max_iter, max_wall_time, min_grad, offset)
 
 if if_rounding:
     rounding_type = "SUR"
@@ -83,8 +87,10 @@ if if_rounding:
     if rounding_type == "SUR":
         min_up_time = "SUR"
 
+    # do the rounding
     bin_amps = rounding(output_control, rounding_type, min_up_time)
 
+    # evolution results by the control list after the rounding
     rounding_result = time_evolution(
         H_d.full(), [h_c.full() for h_c in H_c], n_ts, evo_time, bin_amps.T, X_0.full(), sum_cons_1)
     f = open(output_control.split(".csv")[0] + "_binary_" + str(min_up_time) + ".log", "w+")
