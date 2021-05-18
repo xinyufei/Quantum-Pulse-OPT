@@ -35,7 +35,7 @@ X_targ = cnot()
 # Time allowed for the evolution
 evo_time = 1
 # Number of time slots
-n_ts = 100 * evo_time
+n_ts = 20 * evo_time
 
 # Fidelity error target
 fid_err_targ = 1e-10
