@@ -11,8 +11,8 @@ Qobj data =
    0.34200439-0.65209664j]]
 
 ********* Summary *****************
-Final fidelity error 0.5833161735796399
-Final gradient normal 0.05715655707184735
+Final fidelity error 0.58331617357964
+Final gradient normal 0.05715655707241815
 Terminated due to function converged
-Number of iterations 17
-Completed in 0:00:00.186543 HH:MM:SS.US
+Number of iterations 18
+Completed in 0:00:00.135952 HH:MM:SS.US
