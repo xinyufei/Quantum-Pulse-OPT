@@ -23,5 +23,13 @@ def time_evolution(H_d, H_c, n_ts, evo_time, u_list, X_0, sum_cons_1):
 
 def compute_obj(U_targ, U_result):
     fid = np.abs(np.trace((np.linalg.inv(U_targ.full()).dot(U_result)))) / U_targ.full().shape[0]
+    # fid = np.abs(np.trace(((U_targ.full()).dot(U_result)))) / U_targ.full().shape[0]
     obj = 1 - fid
     return obj
+
+
+def compute_obj_with_TV(U_targ, U_result, u_list, n_ctrls, alpha):
+    fid = np.abs(np.trace((np.linalg.inv(U_targ.full()).dot(U_result)))) / U_targ.full().shape[0]
+    TV = sum(sum(abs(u_list[time_step + 1, j] - u_list[time_step, j]) for time_step in range(u_list.shape[0] - 1))
+             for j in range(u_list.shape[1]))
+    return 1 - fid + alpha * TV

@@ -8,6 +8,7 @@ import qutip.control.pulseoptim as cpo
 import qutip.control.pulsegen as pulsegen
 
 
+
 def optcontrol(example_name, H_d, H_c, X_0, X_targ, n_ts, evo_time, initial_type, initial_control,
                output_num=None, output_fig=None, output_control=None, sum_one_constraint=False,
                fid_err_targ=1e-10, max_iter=500, max_wall_time=600, min_grad=1e-10, constant=0.5):

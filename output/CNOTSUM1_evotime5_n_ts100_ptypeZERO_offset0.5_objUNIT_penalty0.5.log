@@ -1,0 +1,20 @@
+Final evolution
+Quantum object: dims = [[4], [4]], shape = (4, 4), type = oper, isherm = False
+Qobj data =
+[[-0.07450295-0.64441434j -0.03366195+0.33447816j  0.31306541+0.4612022j
+  -0.37787736-0.11252548j]
+ [-0.03604866+0.1912792j  -0.65142944-0.47680263j  0.48495257+0.00304434j
+  -0.23599809-0.13974381j]
+ [ 0.13166486+0.47006529j  0.2820985 +0.06695368j -0.15256811+0.07220097j
+  -0.7974153 -0.11523652j]
+ [-0.1077969 -0.53979166j -0.02450692-0.38810722j -0.39256468-0.52105402j
+  -0.33855643-0.07451317j]]
+
+********* Summary *****************
+Final fidelity error 0.3500214968795403
+Final gradient normal 0.05773894044072923
+Terminated due to function converged
+Number of iterations 10
+Completed in 0:00:00.256806 HH:MM:SS.US
+Final objective value with norm: 
+3.101004128329043
