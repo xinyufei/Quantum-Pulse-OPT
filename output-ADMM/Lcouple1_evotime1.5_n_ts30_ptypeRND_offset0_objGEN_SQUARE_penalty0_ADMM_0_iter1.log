@@ -1,0 +1,57 @@
+Final evolution
+[[0.26510061-0.88290342j]
+ [0.36055364-0.14214179j]]
+
+********* Summary *****************
+Final fidelity error 0.14582574790734948
+Final objective value 0.14582574790734926
+Final norm value -2.220446049250313e-16
+Final error 236.53487327480792
+Terminate reason Exceed the maximum number of iteration of ADMM
+Number of iterations 1
+Completed in 0:00:00.752060 HH:MM:SS.US
+Time for each iteration [0.7520596981048584]
+Final objective value with penalty: 
+0.14582574790734948
+Final objective value with penalty: 
+0.14582574790734948
+Final TV norm without penalty
+62.883218660354615
+Final evolution
+[[-0.76601107-0.36990965j]
+ [-0.47342179-0.22861694j]]
+
+********* Summary *****************
+Final fidelity error 6.401545959988653e-13
+Final objective value 6.401545959988653e-13
+Final norm value 0.0
+Final error 175.5098730925839
+Terminate reason Exceed the maximum number of iteration of ADMM
+Number of iterations 1
+Completed in 0:00:04.659413 HH:MM:SS.US
+Time for each iteration [4.65941309928894]
+Final objective value with penalty: 
+6.401545959988653e-13
+Final objective value with penalty: 
+6.401545959988653e-13
+Final TV norm without penalty
+53.148123648997036
+Final evolution
+[[-0.35521534-0.7729345j ]
+ [-0.2195364 -0.47770084j]]
+
+********* Summary *****************
+Final fidelity error 1.9118040484045196e-12
+Final objective value 1.9118040484045196e-12
+Final norm value 0.0
+Final error 208.36431131807754
+Terminate reason Exceed the maximum number of iteration of ADMM
+Number of iterations 1
+Completed in 0:00:02.837587 HH:MM:SS.US
+Time for each iteration [2.8375868797302246]
+Final objective value with penalty: 
+1.9118040484045196e-12
+Final objective value with penalty: 
+1.9118040484045196e-12
+Final TV norm without penalty
+57.34901842390506

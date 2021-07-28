@@ -34,9 +34,9 @@ X_0 = identity(4)
 X_targ = cnot()
 
 # Time allowed for the evolution
-evo_time = 20
+evo_time = 1
 # Number of time steps
-n_ts = 20 * evo_time
+n_ts = 10 * evo_time
 
 # Fidelity error target
 fid_err_targ = 1e-8
@@ -70,7 +70,7 @@ if not os.path.exists("../output/"):
 if not os.path.exists("../control/"):
     os.makedirs("../control/")
 
-alpha = 0.1
+alpha = 0.001
 
 output_num = "../output/" + "{}_evotime{}_n_ts{}_ptype{}_offset{}_obj{}_penalty{}".format(
     example_name, evo_time, n_ts, p_type, offset, obj_type, alpha) + ".log"
@@ -86,25 +86,25 @@ optcontrol(example_name, H_d, H_c, X_0, X_targ, n_ts, evo_time, p_type, initial_
 
 b_rel = np.loadtxt(output_control, delimiter=",")
 c_result = time_evolution(
-        H_d.full(), [h_c.full() for h_c in H_c], n_ts, evo_time, b_rel, X_0.full(), sum_cons_1)
+        H_d.full(), [h_c.full() for h_c in H_c], n_ts, evo_time, b_rel, X_0.full(), sum_cons_1, 1)
 f = open(output_num, "a+")
 print("Final objective value with norm: ", file=f)
 print(compute_obj_with_TV(X_targ, c_result, b_rel, 1, alpha), file=f)
 f.close()
 
 if if_rounding:
-    rounding_type = "BnB"
+    rounding_type = "SUR"
     min_up_time = 10
 
     if rounding_type == "SUR":
         min_up_time = "SUR"
 
     # do the rounding
-    bin_amps = rounding(output_control, rounding_type, min_up_time)
+    bin_amps = rounding(output_control, evo_time, 3200, rounding_type, min_up_time)
 
     # evolution results by the control list after the rounding
     rounding_result = time_evolution(
-        H_d.full(), [h_c.full() for h_c in H_c], n_ts, evo_time, bin_amps.T, X_0.full(), sum_cons_1)
+        H_d.full(), [h_c.full() for h_c in H_c], n_ts, evo_time, bin_amps.T, X_0.full(), sum_cons_1, 1)
     f = open(output_control.split(".csv")[0] + "_binary_" + str(min_up_time) + ".log", "w+")
     print("Rounding result: ", file=f)
     print(rounding_result, file=f)

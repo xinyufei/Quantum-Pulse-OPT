@@ -15,7 +15,7 @@ class Optcontrol_ADMM():
         self.H_c = None
         self.X_0 = None
         self.X_targ = None
-        self.n_ts = None
+        self.n_ts = 0
         self.evo_time = None
         self.amp_lbound = None
         self.amp_ubound = None
@@ -37,6 +37,10 @@ class Optcontrol_ADMM():
         self.admm_err_targ = None
         self.time_optimize_start_step = 0
         self.num_iter_step = 0
+
+        self.cur_obj = 0
+        self.onto = [None] * (self.n_ts + 1)
+        self.fwd = [None] * (self.n_ts + 1)
 
         # variables and parameters for ADMM
         self.v = None
@@ -99,6 +103,10 @@ class Optcontrol_ADMM():
             self.v = np.zeros((self.n_ts - 1, self.n_ctrls))
             self._lambda = np.zeros((self.n_ts - 1, self.n_ctrls))
 
+        self.cur_obj = 0
+        self.onto = [None] * (self.n_ts + 1)
+        self.fwd = [None] * (self.n_ts + 1)
+
     def _initialize_control(self):
         """
         :param self:
@@ -115,6 +123,8 @@ class Optcontrol_ADMM():
         if self.p_type == "WARM":
             # file = open(self.initial_control)
             warm_start_control = np.loadtxt(self.initial_control, delimiter=",")
+            if len(warm_start_control.shape) == 1:
+                warm_start_control = np.reshape(warm_start_control, (warm_start_control.shape[0], 1))
             evo_time_start = warm_start_control.shape[0]
             step = self.n_ts / evo_time_start
             for j in range(self.n_ctrls):
@@ -132,13 +142,18 @@ class Optcontrol_ADMM():
                 H_t += control_amps[t, j] * self.H_c[j].copy()
             X_t = expm(-1j * H_t * delta_t).dot(X[t])
             X.append(X_t)
+        self.fwd = X
         return X[-1]
 
     def compute_fid(self, evolution_result):
         fid = 0
         if self.obj_type == "UNIT" and self.phase_option == "PSU":
+            # print(np.trace(
+            #     np.linalg.inv(self.X_targ).dot(evolution_result)))
             fid = np.abs(np.trace(
                 np.linalg.inv(self.X_targ).dot(evolution_result))) / self.X_targ.shape[0]
+        if self.obj_type == "GEN_SQUARE":
+            fid = np.square(np.abs(np.trace(self.X_targ.conj().T.dot(evolution_result))))
         return fid
 
     def compute_norm(self, control_amps):
@@ -196,36 +211,60 @@ class Optcontrol_ADMM():
         onto = np.array(onto)
         fwd = np.array(fwd)
         grad = np.zeros((self.n_ts, self.n_ctrls), dtype=complex)
+
         for t in range(self.n_ts):
             for j in range(self.n_ctrls):
                 grad_temp = expm_frechet(-1j * H[t] * delta_t, -1j * self.H_c[j] * delta_t, compute_expm=False)
                 g = np.trace(onto[t + 1].dot(grad_temp).dot(fwd[t]))
                 grad[t, j] = g
         fid_pre = np.trace(self.X_targ.conj().T.dot(fwd[-1]))
-        fid_grad = - np.real(grad * np.exp(-1j * np.angle(fid_pre)) / self.X_targ.shape[0]).flatten()
+
+        if self.obj_type == "UNIT" and self.phase_option == "PSU":
+            fid_grad = - np.real(grad * np.exp(-1j * np.angle(fid_pre)) / self.X_targ.shape[0]).flatten()
+        if self.obj_type == "GEN_SQUARE":
+            # fid_grad = - 2 * np.real(grad * np.exp(-1j * np.angle(fid_pre)) * np.abs(fid_pre)).flatten()
+            fid_grad = - 2 * np.real(grad * fid_pre).flatten()
 
         norm_grad = np.zeros((self.n_ts, self.n_ctrls))
-        for j in range(self.n_ctrls):
-            norm_grad[0, j] = -self.rho * (control_amps[1, j] - control_amps[0, j] - self.v[0, j] + self._lambda[0, j])\
-                              + self.rho * (sum(control_amps[0, j] - control_amps[1, j] for j in range(self.n_ctrls))
-                                            - self.v[0, self.n_ctrls] + self._lambda[0, self.n_ctrls])
-            norm_grad[self.n_ts - 1, j] = self.rho * (control_amps[self.n_ts - 1, j] - control_amps[self.n_ts - 2, j]
-                                                      - self.v[self.n_ts - 2, j] + self._lambda[self.n_ts - 2, j]) \
-                                          - self.rho * (sum(
-                control_amps[self.n_ts - 2, j] - control_amps[self.n_ts - 1, j] for j in range(self.n_ctrls))
-                                                        - self.v[self.n_ts - 2, self.n_ctrls] + self._lambda[
-                                                            self.n_ts - 2, self.n_ctrls])
-            for t in range(1, self.n_ts - 1):
-                norm_grad[t, j] = self.rho * (control_amps[t, j] - control_amps[t - 1, j] - self.v[t - 1, j]
-                                              + self._lambda[t - 1, j]) \
-                                  - self.rho * (control_amps[t + 1, j] - control_amps[t, j] - self.v[t, j]
-                                                + self._lambda[t, j]) \
-                                  + self.rho * (sum(control_amps[t, j] - control_amps[t + 1, j]
-                                                    for j in range(self.n_ctrls))
-                                                - self.v[t, self.n_ctrls] + self._lambda[t, self.n_ctrls]) \
-                                  - self.rho * (sum(control_amps[t - 1, j] - control_amps[t, j]
-                                                    for j in range(self.n_ctrls))
-                                                - self.v[t - 1, self.n_ctrls] + self._lambda[t - 1, self.n_ctrls])
+
+        if self.sum_cons_1:
+            for j in range(self.n_ctrls):
+                norm_grad[0, j] = -self.rho * (
+                            control_amps[1, j] - control_amps[0, j] - self.v[0, j] + self._lambda[0, j]) \
+                                  + self.rho * (
+                                              sum(control_amps[0, j] - control_amps[1, j] for j in range(self.n_ctrls))
+                                              - self.v[0, self.n_ctrls] + self._lambda[0, self.n_ctrls])
+                norm_grad[self.n_ts - 1, j] = self.rho * (
+                            control_amps[self.n_ts - 1, j] - control_amps[self.n_ts - 2, j]
+                            - self.v[self.n_ts - 2, j] + self._lambda[self.n_ts - 2, j]) \
+                                              - self.rho * (sum(
+                    control_amps[self.n_ts - 2, j] - control_amps[self.n_ts - 1, j] for j in range(self.n_ctrls))
+                                                            - self.v[self.n_ts - 2, self.n_ctrls] + self._lambda[
+                                                                self.n_ts - 2, self.n_ctrls])
+                for t in range(1, self.n_ts - 1):
+                    norm_grad[t, j] = self.rho * (control_amps[t, j] - control_amps[t - 1, j] - self.v[t - 1, j]
+                                                  + self._lambda[t - 1, j]) \
+                                      - self.rho * (control_amps[t + 1, j] - control_amps[t, j] - self.v[t, j]
+                                                    + self._lambda[t, j]) \
+                                      + self.rho * (sum(control_amps[t, j] - control_amps[t + 1, j]
+                                                        for j in range(self.n_ctrls))
+                                                    - self.v[t, self.n_ctrls] + self._lambda[t, self.n_ctrls]) \
+                                      - self.rho * (sum(control_amps[t - 1, j] - control_amps[t, j]
+                                                        for j in range(self.n_ctrls))
+                                                    - self.v[t - 1, self.n_ctrls] + self._lambda[t - 1, self.n_ctrls])
+        else:
+            for j in range(self.n_ctrls):
+                norm_grad[0, j] = -self.rho * (
+                        control_amps[1, j] - control_amps[0, j] - self.v[0, j] + self._lambda[0, j])
+                norm_grad[self.n_ts - 1, j] = self.rho * (
+                            control_amps[self.n_ts - 1, j] - control_amps[self.n_ts - 2, j] - self.v[self.n_ts - 2, j] +
+                            self._lambda[self.n_ts - 2, j])
+                for t in range(1, self.n_ts - 1):
+                    norm_grad[t, j] = self.rho * (control_amps[t, j] - control_amps[t - 1, j] - self.v[t - 1, j]
+                                                  + self._lambda[t - 1, j]) \
+                                      - self.rho * (control_amps[t + 1, j] - control_amps[t, j] - self.v[t, j]
+                                                    + self._lambda[t, j])
+        # print(fid_grad + norm_grad.flatten())
         return fid_grad + norm_grad.flatten()
 
     def _minimize_u(self):
@@ -235,11 +274,23 @@ class Optcontrol_ADMM():
         #                                   bounds=scipy.optimize.Bounds(self.amp_lbound, self.amp_ubound),
         #                                   tol=self.min_grad,
         #                                   options={"maxiter": self.max_iter_step}, callback=self._step_call_back)
+        # self.u += 0.5
+        # initial_grad = self._fprime(self.u.reshape(-1))
+        # threshold = 1e-2
+        # min_grad = max(np.linalg.norm(initial_grad) * threshold, self.min_grad)
+        min_grad = self.min_grad
+        # f = open(self.output_num, "a+")
+        # print(min_grad, file=f)
+        # results = scipy.optimize.fmin_l_bfgs_b(self._compute_err, self.init_amps.reshape(-1),
+        #                                        bounds=[(self.amp_lbound, self.amp_ubound)] * self.n_ts * self.n_ctrls,
+        #                                        pgtol=min_grad, fprime=self._fprime,
+        #                                        maxiter=self.max_iter_step, callback=self._step_call_back)
         results = scipy.optimize.fmin_l_bfgs_b(self._compute_err, self.init_amps.reshape(-1),
                                                bounds=[(self.amp_lbound, self.amp_ubound)] * self.n_ts * self.n_ctrls,
-                                               pgtol=self.min_grad, fprime=self._fprime,
+                                               pgtol=min_grad, approx_grad=True,
                                                maxiter=self.max_iter_step, callback=self._step_call_back)
         self.u = results[0].reshape((self.n_ts, self.n_ctrls)).copy()
+        self.cur_obj = results[1]
 
     def _minimize_v(self):
         for j in range(self.n_ctrls):
@@ -288,20 +339,24 @@ class Optcontrol_ADMM():
             self._lambda = np.zeros((self.n_ts - 1, self.n_ctrls + 1))
         self.p_type = "ADMM"
         admm_start = time.time()
-        admm_num_iter = 0
+        self.admm_num_iter = 0
         time_iter = [0]
+        threshold = 1e-1
         while 1:
-            admm_num_iter += 1
-            if admm_num_iter > 1:
+            self.admm_num_iter += 1
+            if self.admm_num_iter > 1:
                 self._initialize_control()
             self._minimize_u()
-            self._minimize_v()
-            self._update_dual()
+            # self._minimize_v()
+            # self._update_dual()
             err = self._admm_err()
+            # if admm_num_iter == 1:
+            #     err_0 = err
             self.err_list.append(err)
-            self.obj_list.append(self._compute_err(self.u.reshape(-1)))
-            norm = self.compute_norm(self.u)
+            self.obj_list.append(self.cur_obj)
+            # norm = self.compute_norm(self.u)
             admm_opt_time = time.time()
+            # self.admm_err_targ = threshold * err_0
             # if err < self.admm_err_targ:
             #     tr = "Achieve the error target of ADMM"
             #     break
@@ -311,14 +366,14 @@ class Optcontrol_ADMM():
             if admm_opt_time - admm_start >= self.max_wall_time_admm:
                 tr = "Exceed the max wall time of ADMM"
                 break
-            if admm_num_iter >= self.max_iter_admm:
+            if self.admm_num_iter >= self.max_iter_admm:
                 tr = "Exceed the maximum number of iteration of ADMM"
                 break
 
         # output the results
         evo_full_final = self.evolution(self.u)
         fid = self.compute_fid(evo_full_final)
-        report = open(self.output_num, "w+")
+        report = open(self.output_num, "a+")
         print("Final evolution\n{}\n".format(evo_full_final), file=report)
         print("********* Summary *****************", file=report)
         print("Final fidelity error {}".format(1 - fid), file=report)
@@ -326,7 +381,7 @@ class Optcontrol_ADMM():
         print("Final norm value {}".format(self.obj_list[-1] - 1 + fid), file=report)
         print("Final error {}".format(self.err_list[-1]), file=report)
         print("Terminate reason {}".format(tr), file=report)
-        print("Number of iterations {}".format(admm_num_iter), file=report)
+        print("Number of iterations {}".format(self.admm_num_iter), file=report)
         print("Completed in {} HH:MM:SS.US".format(datetime.timedelta(seconds=admm_opt_time - admm_start)), file=report)
         print("Time for each iteration", time_iter[1:], file=report)
     

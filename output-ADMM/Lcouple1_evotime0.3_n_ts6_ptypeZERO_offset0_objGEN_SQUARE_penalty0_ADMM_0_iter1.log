@@ -1,0 +1,19 @@
+Final evolution
+[[-0.90017479-0.19492113j]
+ [ 0.37037628-0.12046788j]]
+
+********* Summary *****************
+Final fidelity error 0.6214338823371717
+Final objective value 0.6214338823371717
+Final norm value 0.0
+Final error 64.0
+Terminate reason Exceed the maximum number of iteration of ADMM
+Number of iterations 1
+Completed in 0:00:00.040213 HH:MM:SS.US
+Time for each iteration [0.04021310806274414]
+Final objective value with penalty: 
+0.6214338823371717
+Final objective value with penalty: 
+0.6214338823371717
+Final TV norm without penalty
+8.0

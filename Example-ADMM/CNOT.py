@@ -11,7 +11,7 @@ from optcontrol_admm import Optcontrol_ADMM
 
 
 if_rounding = True
-if_warm_start = False
+if_warm_start = True
 # if_rounding = True
 
 sum_cons_1 = True
@@ -22,7 +22,7 @@ example_name = 'CNOT'
 
 # with summation one constraint
 if sum_cons_1:
-    example_name = 'CNOTSUM1FPRIME2'
+    example_name = 'CNOTSUM1INEXACT'
 
 # The control Hamiltonians (Qobj classes)
 H_c = [tensor(sigmax(), identity(2)), tensor(sigmay(), identity(2))]
@@ -34,7 +34,7 @@ X_0 = identity(4)
 X_targ = cnot()
 
 # Time allowed for the evolution
-evo_time = 1
+evo_time = 5
 # Number of time slots
 n_ts = 20 * evo_time
 
@@ -49,7 +49,7 @@ max_wall_time_step = 240
 min_grad = 1e-8
 
 # initialized type
-p_type = "ZERO"
+p_type = "RANDOM"
 offset = 0.5
 # p_type = "RND"
 # offset = 0
@@ -59,11 +59,11 @@ obj_type = "UNIT"
 initial_control = None  # no warm start
 
 # ADMM parameter
-alpha = 0.05
-rho = 0.25
+alpha = 5e-1
+rho = 10
 max_iter_admm = 200
 max_wall_time_admm = 7200 * 100
-admm_err_targ = 1e-5
+admm_err_targ = 1e-6
 
 os.chdir(sys.path[0])
 
@@ -72,7 +72,7 @@ if if_warm_start:
     p_type = "WARM"
     offset = 0
     initial_control = "../control-ADMM/" + "{}_evotime{}_n_ts{}_ptype{}_offset{}_obj{}_penalty{}_ADMM_{}_iter{}".format(
-        example_name, 10, 200, "ZERO", 0.5, obj_type, alpha, rho, max_iter_admm) + ".csv"
+        example_name, evo_time, evo_time * 20, "WARM", 0, obj_type, 1e-1, 0.25, max_iter_admm) + ".csv"
 
 if not os.path.exists("../output-ADMM/"):
     os.makedirs("../output-ADMM/")
@@ -102,10 +102,13 @@ CNOT_opt_admm.optimize_admm()
 
 b_rel = np.loadtxt(output_control, delimiter=",")
 c_result = time_evolution(
-        H_d.full(), [h_c.full() for h_c in H_c], n_ts, evo_time, b_rel, X_0.full(), sum_cons_1)
+        H_d.full(), [h_c.full() for h_c in H_c], n_ts, evo_time, b_rel, X_0.full(), 1, sum_cons_1)
 f = open(output_num, "a+")
 print("Final objective value with penalty: ", file=f)
-print(compute_obj_with_TV(X_targ, c_result, b_rel, 1, alpha), file=f)
+obj_TV = compute_obj_with_TV(X_targ, c_result, b_rel, 1, alpha)
+print(obj_TV, file=f)
+print("Final TV norm without penalty", file=f)
+print((obj_TV - compute_obj(X_targ, c_result)) / alpha, file=f)
 f.close()
 
 if if_rounding:
@@ -120,7 +123,7 @@ if if_rounding:
 
     # evolution results by the control list after the rounding
     rounding_result = time_evolution(
-        H_d.full(), [h_c.full() for h_c in H_c], n_ts, evo_time, bin_amps.T, X_0.full(), sum_cons_1)
+        H_d.full(), [h_c.full() for h_c in H_c], n_ts, evo_time, bin_amps.T, X_0.full(), 1, sum_cons_1)
     f = open(output_control.split(".csv")[0] + "_binary_" + str(min_up_time) + ".log", "w+")
     print("Rounding result: ", file=f)
     print(rounding_result, file=f)

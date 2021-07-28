@@ -5,12 +5,12 @@ from code_Brady_opt.generate_matrix import *
 import sys
 sys.path.append("..")
 from optcontrol import optcontrol
-from rounding import rounding
+# from rounding import rounding
 from evolution import time_evolution, compute_obj
 
 if_rounding = False
 # if_rounding = True
-if rounding:
+if if_rounding:
     rounding_type = "BnB"
     min_up_time = 10
 if_warm_start = False
